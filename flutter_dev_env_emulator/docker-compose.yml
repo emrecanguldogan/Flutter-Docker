@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  flutter_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flutter-dev-image
+    container_name: flutter-dev-container_try
+    restart: unless-stopped
+
+    # === PRIVILEGED MODE ===
+    # DİKKAT: YÜKSEK GÜVENLİK RİSKİ TAŞIR.
+    privileged: true
+    # =======================
+
+    # === GPU Kaynakları (Nvidia Container Toolkit gerektirir) ===
+    # Bu bölüm, container'ın Nvidia GPU'lara erişimini sağlar.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all # Tüm uygun GPU'ları kullan
+              capabilities: [gpu] # GPU yeteneğini iste
+    # ==========================================================
+
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - flutter-sdk-cache:/root/.config/flutter
+      - android-sdk-cache:/root/.android
+      - gradle-cache:/root/.gradle
+      - pub-cache:/root/.pub-cache
+      
+      # KVM aygıtı maplenmiştir (privileged modu garanti etse de açıkça belirtebiliriz)
+      - /dev/kvm:/dev/kvm
+      
+      # Grafik aygıtı maplenmiştir (privileged modu garanti etse de açıkça belirtebiliriz)
+      # devices bölümü yerine deploy resources kullandığımız için buraya gerek kalmadı genellikle
+      # - /dev/dri:/dev/dri
+
+
+    environment:
+      - DISPLAY=${DISPLAY}
+      - ANDROID_SDK_ROOT=/root/android-sdk
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      # Emülatör için bazı ekran ayarları faydalı olabilir (isteğe bağlı)
+      # - QT_X11_NO_MITSHM=1
+      # - _JAVA_AWT_WM_NONREPARENTING=1
+
+
+    # Privileged modda cihaz bağlamalarına gerek kalmadı (deploy resources da yetebilir)
+    # devices:
+    #   - /dev/bus/usb:/dev/bus/usb
+    #   - /dev/dri:/dev/dri
+
+
+    # Port eşlemeleri (isteğe bağlı)
+    # - "8080:8080"
+
+volumes:
+  flutter-sdk-cache:
+  android-sdk-cache:
+  gradle-cache:
+  pub-cache:

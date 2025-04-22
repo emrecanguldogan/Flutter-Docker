@@ -1,0 +1,6 @@
+/root/android-sdk/emulator/emulator -avd pixel -gpu host -no-audio -no-boot-anim
+emulator -avd pixel -gpu host -no-audio -no-boot-anim
+
+adb push build/app/outputs/flutter-apk/app-release.apk /sdcard/
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+
