@@ -11,13 +11,15 @@ This development environment setup involves configurations that require elevated
 ## Features
 
 * **Isolated Environment:** Develop in a clean, consistent environment isolated from your host system.
+* **Shared Project Directory:** Your project files on the host machine are mapped into the container (`.:/app`), allowing you to edit code using your preferred host tools (like VS Code) while building and running within the container.
 * **Pre-configured SDKs:** Includes the Android SDK, command-line tools, and a specific Java Development Kit (OpenJDK 17).
+* **Android NDK Included:** Comes with a specified version of the Android Native Development Kit (NDK).
 * **Flutter SDK Included:** Comes with a specified version of the Flutter SDK.
-* **Android Emulator Support:** Configured to run an Android emulator with potential GPU acceleration.
+* **Android Emulator Support:** Configured to run an Android emulator.
 * **Physical Device Support (ADB):** Allows connecting a physical Android device via ADB for debugging and running builds.
 * **Persistent Caching:** Uses Docker volumes to cache SDKs, Gradle, and Flutter assets for faster build times across container restarts.
 * **X11 Forwarding:** Configured to allow graphical applications (like the Android Emulator) to display on your host machine.
-* **Optional GPU Acceleration (Nvidia Container Toolkit):** Includes configuration options for leveraging Nvidia GPUs via the Nvidia Container Toolkit. Eventhough Nvidia GPUs cannot be used on android emulation. Refer to the [Issues](#issues) section for further details.
+* **Optional GPU Acceleration (Nvidia Container Toolkit):** Includes configuration options for leveraging Nvidia GPUs via the Nvidia Container Toolkit for potentially improved emulator performance. **Note:** Achieving consistent and reliable GPU acceleration in this containerized environment can be challenging across different host setups. Refer to the [Issues](#issues) section for further details.
 
 ## Prerequisites
 
@@ -84,6 +86,13 @@ Once the container is running, you can connect to it and start developing.
     * The device is recognized and accessible by your **host** operating system.
     * **USB Debugging** is enabled on your Android device (usually found in Developer Options).
     * You have authorized your host computer for USB debugging when prompted on the device.
+
+    **Listing Installed SDK Components:**
+    To see which Android SDK components, including NDK versions, are currently installed in the container, use the `sdkmanager` tool:
+
+    ```bash
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --list_installed
+    ```
 
 3.  **Start the Android Emulator:**
     In the integrated terminal, run the command to start the pre-configured Android emulator:

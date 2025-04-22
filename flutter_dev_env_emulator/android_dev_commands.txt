@@ -15,8 +15,16 @@
 
 # To send file to emulated device
     adb -s [device_ser_num] push [local_file_path] [device_path]
-    # examp adb push build/app/outputs/flutter-apk/app-release.apk /sdcard/
+    # examp: adb push build/app/outputs/flutter-apk/app-release.apk /sdcard/
 
 # To run apk on emulated device
     adb -s [device_ser_num] install -r [local_apk_path]
 
+# To list which Android SDK components, including NDK versions, are currently installed
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --list_installed
+
+# To install sdk components/packages
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "packed_id"
+    # examps: 
+    # yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" (install spesific SDK platform)
+    # yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "ndk-bundle" (install last stable NDK)

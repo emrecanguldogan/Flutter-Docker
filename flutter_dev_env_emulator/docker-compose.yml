@@ -11,7 +11,7 @@ services:
 
     # === PRIVILEGED MODE ===
     # WARNING: CARRIES HIGH SECURITY RISK.
-    # privileged: true # Commented out by default for security
+    privileged: true
     # =======================
 
     # === GPU Resources (Requires Nvidia Container Toolkit for Nvidia GPUs) ===
