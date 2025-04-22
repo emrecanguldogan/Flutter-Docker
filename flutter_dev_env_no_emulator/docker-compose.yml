@@ -9,17 +9,17 @@ services:
     container_name: flutter-dev-container-try2
     restart: unless-stopped
 
-    # DİKKAT: Bu ayar container'a ana makine üzerinde neredeyse tam yetki verir ve güvenlik riski taşır.
+    # WARNING: This setting gives the container almost full authority on the host machine and carries a security risk.
     privileged: true
 
     volumes:
-      # Proje dizinini container içindeki /app'e bağla
+      # Mount the project directory to /app inside the container
       - .:/app
-      # X11 soketini bağla (GUI çıktısı için - Temel X11)
+      # Mount the X11 socket (for GUI output - Basic X11)
       - /tmp/.X11-unix:/tmp/.X11-unix
-      # XDG_RUNTIME_DIR kaldırıldı
+      # XDG_RUNTIME_DIR removed
       # - /run/user/${USER_UID}:/run/user/${USER_UID}
-      # Cache Volume Önerileri (İsteğe Bağlı) - Yollar Root'a ayarlı
+      # Cache Volume Suggestions (Optional) - Paths set to Root
       - flutter-sdk-cache:/root/.config/flutter
       - android-sdk-cache:/root/.android
       - gradle-cache:/root/.gradle
@@ -27,20 +27,20 @@ services:
 
     environment:
       - DISPLAY=${DISPLAY}
-      # XDG_RUNTIME_DIR kaldırıldı
+      # XDG_RUNTIME_DIR removed
       # - XDG_RUNTIME_DIR=/run/user/${USER_UID}
       - ANDROID_SDK_ROOT=/root/android-sdk
       - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
-    # Privileged modda cihaz bağlamasına gerek kalmadı
+    # Device mapping is not needed in privileged mode
     # devices:
     #   - /dev/bus/usb:/dev/bus/usb
-    #   - /dev/dri:/dev/dri # Eğer grafik donanımı erişimi gerekirse eklenebilir
+    #   - /dev/dri:/dev/dri # Can be added if graphics hardware access is needed
 
-    # Port eşlemeleri (isteğe bağlı)
+    # Port mappings (optional)
     # - "8080:8080"
 
-# Cache Volume Tanımları (İsteğe Bağlı)
+# Cache Volume Definitions (Optional)
 volumes:
   flutter-sdk-cache:
   android-sdk-cache:

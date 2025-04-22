@@ -3,22 +3,22 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
-echo "X11 erişimi veriliyor..."
+echo "Granting X11 access..."
 xhost +local:docker
 
-echo "flutter-dev-container başlatılıyor..."
+echo "Starting flutter-dev-container..."
 docker compose up --build -d
 
 if [ $? -eq 0 ]; then
-    echo "Başarılı! VS Code ile bağlanabilirsin."
-    echo "Emülatörü başlatmak için konteyner içinde şu komutu çalıştır:"
+    echo "Success! You can connect with VS Code."
+    echo "To start the pre-configured emulator inside the container, run this command:"
     echo ""
-    echo "    emulator -avd pixel -gpu swiftshader_indirect -no-audio -no-boot-anim"
+    echo "    /root/android-sdk/emulator/emulator -avd pixel -gpu host -no-audio -no-boot-anim
     echo ""
-    echo "Sonrasında Flutter uygulamanı şu komutla çalıştırabilirsin:"
+    echo "After that, you can run your Flutter application with this command:"
     echo ""
     echo "    flutter run"
 else
-    echo "Başlatılamadı. Logları kontrol et: docker compose logs"
+    echo "Startup failed. Check the logs: docker compose logs"
 fi
-
+    

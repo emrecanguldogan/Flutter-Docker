@@ -1,14 +1,14 @@
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 ENV FLUTTER_VERSION=3.29.3
 
 ENV ANDROID_SDK_ROOT=/root/android-sdk
 ENV PATH="${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:/flutter/bin"
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
-# Gerekli paketleri yükle
+# Install necessary packages
 RUN apt-get update && apt-get install -y \
     curl wget git unzip xz-utils openjdk-17-jdk \
     build-essential clang cmake ninja-build pkg-config \
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     qemu-kvm virt-manager \
     && rm -rf /var/lib/apt/lists/*
 
-# Flutter'ı indir ve kur
+# Download and install Flutter
 RUN FLUTTER_DL_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" && \
     wget $FLUTTER_DL_URL -O /tmp/flutter.tar.xz && \
     mkdir /flutter && \
@@ -28,14 +28,14 @@ RUN FLUTTER_DL_URL="https://storage.googleapis.com/flutter_infra_release/release
 
 RUN git config --global --add safe.directory /flutter
 
-# Android SDK ve emulator araçları
+# Android SDK and emulator tools
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
-    wget https://dl.google.com/android/repository/commandlinetools-linux-12700392_latest.zip -O /tmp/cmdline.zip && \
+    wget https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip -O /tmp/cmdline.zip && \
     unzip /tmp/cmdline.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools/ && \
     mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
     rm /tmp/cmdline.zip
 
-# SDK bileşenlerini kur
+# Install SDK components
 RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
     "platform-tools" \
     "build-tools;34.0.0" \
@@ -46,10 +46,10 @@ RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
 
 RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
 
-# AVD oluştur
+# Create AVD
 RUN echo "no" | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/avdmanager create avd -n pixel -k "system-images;android-34;google_apis;x86_64" --device "pixel"
 
-# Flutter önbellek
+# Flutter precache
 RUN /flutter/bin/flutter precache --linux --web --android
 
 # Flutter doctor
@@ -58,4 +58,3 @@ RUN /flutter/bin/flutter doctor
 WORKDIR /app
 
 CMD ["tail", "-f", "/dev/null"]
-

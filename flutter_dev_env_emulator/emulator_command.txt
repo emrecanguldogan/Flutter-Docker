@@ -1,6 +1,22 @@
-/root/android-sdk/emulator/emulator -avd pixel -gpu host -no-audio -no-boot-anim
-emulator -avd pixel -gpu host -no-audio -no-boot-anim
+# To run emulator
+    [emulator path] -avd [avd_name] -gpu host -no-audio -no-boot-anim
+# or
+    emulator -avd [avd_name] -gpu host -no-audio -no-boot-anim ()
 
-adb push build/app/outputs/flutter-apk/app-release.apk /sdcard/
-adb install -r build/app/outputs/flutter-apk/app-release.apk
+# *default [emulator path]  =  "/root/android-sdk/emulator/emulator"
+# *default [avd_name]  =  "pixel"
+
+"""
+# To add to emulator
+    export ANDROID_HOME = [emulator path]
+    export PATH = $ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH
+    source ~/.bashrc
+"""
+
+# To send file to emulated device
+    adb -s [device_ser_num] push [local_file_path] [device_path]
+    # examp adb push build/app/outputs/flutter-apk/app-release.apk /sdcard/
+
+# To run apk on emulated device
+    adb -s [device_ser_num] install -r [local_apk_path]
 

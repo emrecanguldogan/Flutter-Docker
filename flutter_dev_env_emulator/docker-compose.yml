@@ -10,19 +10,21 @@ services:
     restart: unless-stopped
 
     # === PRIVILEGED MODE ===
-    # DİKKAT: YÜKSEK GÜVENLİK RİSKİ TAŞIR.
-    privileged: true
+    # WARNING: CARRIES HIGH SECURITY RISK.
+    # privileged: true # Commented out by default for security
     # =======================
 
-    # === GPU Kaynakları (Nvidia Container Toolkit gerektirir) ===
-    # Bu bölüm, container'ın Nvidia GPU'lara erişimini sağlar.
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all # Tüm uygun GPU'ları kullan
-              capabilities: [gpu] # GPU yeteneğini iste
+    # === GPU Resources (Requires Nvidia Container Toolkit for Nvidia GPUs) ===
+    # This section allows the container to access GPUs for hardware acceleration.
+    # Uncomment this section ONLY if you have an Nvidia GPU AND the Nvidia Container Toolkit installed.
+    # For AMD/Intel GPUs, different configurations might be needed (e.g., via device mapping if supported).
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all # Use all available GPUs
+    #           capabilities: [gpu] # Request GPU capability
     # ==========================================================
 
     volumes:
@@ -32,12 +34,13 @@ services:
       - android-sdk-cache:/root/.android
       - gradle-cache:/root/.gradle
       - pub-cache:/root/.pub-cache
-      
-      # KVM aygıtı maplenmiştir (privileged modu garanti etse de açıkça belirtebiliriz)
+
+      # KVM device is mapped (can be explicitly specified even if privileged mode guarantees it)
       - /dev/kvm:/dev/kvm
-      
-      # Grafik aygıtı maplenmiştir (privileged modu garanti etse de açıkça belirtebiliriz)
-      # devices bölümü yerine deploy resources kullandığımız için buraya gerek kalmadı genellikle
+
+      # Graphics device is mapped (can be explicitly specified even if privileged mode guarantees it)
+      # Generally not needed here if using deploy resources or privileged mode.
+      # Might be needed for non-Nvidia GPUs if deploy resources doesn't work.
       # - /dev/dri:/dev/dri
 
 
@@ -45,18 +48,18 @@ services:
       - DISPLAY=${DISPLAY}
       - ANDROID_SDK_ROOT=/root/android-sdk
       - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-      # Emülatör için bazı ekran ayarları faydalı olabilir (isteğe bağlı)
+      # Some display settings might be useful for the emulator (optional)
       # - QT_X11_NO_MITSHM=1
       # - _JAVA_AWT_WM_NONREPARENTING=1
 
 
-    # Privileged modda cihaz bağlamalarına gerek kalmadı (deploy resources da yetebilir)
+    # Explicit device mappings (e.g., for USB devices or graphics if deploy/privileged is not used)
     # devices:
     #   - /dev/bus/usb:/dev/bus/usb
-    #   - /dev/dri:/dev/dri
+    #   - /dev/dri:/dev/dri # Redundant if deploy resources or privileged is used
 
 
-    # Port eşlemeleri (isteğe bağlı)
+    # Port mappings (optional)
     # - "8080:8080"
 
 volumes:
