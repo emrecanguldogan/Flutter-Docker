@@ -6,7 +6,7 @@ This project provides a fully containerized development environment for building
 
 ## ⚠️ Warning
 
-This development environment setup involves configurations that require elevated privileges on the host system and grant the Docker container certain levels of access (such as X11 display access and device mapping like `/dev/kvm`). While necessary for features like the Android emulator GUI and hardware acceleration, these configurations can reduce the isolation between the container and the host and carry potential security implications. Please review the `docker-compose.yml` and the setup script (`start.sh`) carefully and understand the permissions being granted. Refer to the [Issues](#issues) section for a more detailed discussion on elevated privileges required.
+This development environment setup involves configurations that require elevated privileges on the host system and grant the Docker container certain levels of access (such as X11 display access and device mapping like `/dev/kvm`). While necessary for features like the Android emulator GUI and hardware acceleration, these configurations can reduce the isolation between the container and the host and carry potential security implications. Please review the `docker-compose.yml` and the setup script (`run.sh`) carefully and understand the permissions being granted. Refer to the [Issues](#issues) section for a more detailed discussion on elevated privileges required.
 
 ## Features
 
@@ -37,48 +37,53 @@ Before you begin, ensure you have the following installed on your host machine:
 
 Follow these steps to set up and run the containerized development environment:
 
-1.  **Clone the Repository:**
+1. **Clone the Repository:**
     ```bash
     git clone [YOUR_REPOSITORY_URL]
     cd [YOUR_PROJECT_DIRECTORY]
     ```
     Replace `[YOUR_REPOSITORY_URL]` and `[YOUR_PROJECT_DIRECTORY]` with your project's actual URL and directory name.
 
-2.  **Review Configuration:**
+2. **Review Configuration:**
     Familiarize yourself with the `Dockerfile` and `docker-compose.yml` files to understand how the environment is built and configured. You can adjust Flutter and SDK versions, volume names, etc., as needed.
 
-3.  **Run the Setup Script:**
+3. **Run the Setup Script:**
     Execute the provided bash script to grant X11 access and build/start the Docker container.
 
     ```bash
-    chmod +x start.sh # Make the script executable if necessary
-    ./start.sh
+    chmod +x run.sh # Make the script executable if necessary
+    ./run.sh
     ```
+
     This script will:
     * Grant your Docker container access to your host's X server (for GUI applications).
     * Build the Docker image (if not already built) using the `Dockerfile`.
     * Start the `flutter_dev` service defined in `docker-compose.yml` in detached mode (`-d`).
 
-4.  **Verify Container Status:**
+4. **Verify Container Status:**
     Ensure the container is running:
 
     ```bash
     docker compose ps
     ```
-    You should see `flutter-dev-container_try` listed with a `State` of `running`.
+
+    You should see `flutter-dev-container` listed with a `State` of `running`.
+
+5. **Give x11 permission:**
+    Ensure that give x11 permission to docker via running `xhost +local:docker` command in terminal. This steps important for acessing GUI element of container from your main machine.
 
 ## Using the Development Environment
 
 Once the container is running, you can connect to it and start developing.
 
-1.  **Connect with VS Code:**
+1. **Connect with VS Code:**
     * Open VS Code.
     * Open the Command Palette (Ctrl+Shift+P or Cmd+Shift+P).
     * Search for and select "Remote-Containers: Attach to Running Container...".
-    * Choose `flutter-dev-container_try` from the list.
+    * Choose `flutter-dev-container` from the list.
     VS Code will open a new window connected to the inside of your Docker container. Your project files from the host machine should be available under `/app` due to the volume mapping in `docker-compose.yml`.
 
-2.  **Open Integrated Terminal:**
+2. **Open Integrated Terminal:**
     Inside the VS Code window connected to the container, open a new Integrated Terminal (Ctrl+` or Cmd+`). This terminal runs directly inside the container.
 
     **Note for Physical Android Devices:**
@@ -94,24 +99,45 @@ Once the container is running, you can connect to it and start developing.
     ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --list_installed
     ```
 
-3.  **Start the Android Emulator:**
+    **Installing Specific Packages:**
+    To install a specific Android SDK package, you use the `sdkmanager` command followed by the package path. You can find available package paths by running `sdkmanager --list`.
+
+    For instance, to install a specific Android platform, like **Android API level 33**:
+
+    ```bash
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platforms;android-33"
+    ```
+
+    **Uninstalling Packages:**
+
+    To uninstall one or more Android SDK packages, simply add the `--uninstall` flag to the `sdkmanager` command and specify the name or path of the package you wish to remove. You can easily find package paths using the `--list_installed` command we covered earlier.
+
+    For instance, to uninstall the **"build-tools;29.0.3"** package:
+
+    ```bash
+    ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --uninstall "build-tools;29.0.3"
+    ```
+
+3. **Start the Android Emulator:**
     In the integrated terminal, run the command to start the pre-configured Android emulator:
 
     ```bash
     emulator -avd pixel -gpu host -no-audio -no-boot-anim
     ```
+
     *(Note: Adjust `-gpu host` based on your setup and if you have the cpu embedded gpu (It work on intel embedded GPU, probably work on amd also). `swiftshader_indirect` is a software rendering option if GPU acceleration is not working).*
 
-4.  **Run Your Flutter Application:**
+4. **Run Your Flutter Application:**
     Navigate to your Flutter project directory within the container (likely `/app`) and run your application:
 
     ```bash
     cd /app
     flutter run
     ```
+
     If the emulator is running, the application should deploy and run on it. You can also connect a physical Android device to your host machine, and it should be accessible within the container (especially if the `/dev/bus/usb` device is mapped or privileged mode is enabled).
 
-5.  **Install/Push APKs Manually (Optional):**
+5. **Install/Push APKs Manually (Optional):**
     If you need to manually install an APK file onto the emulator or a connected device from within the container:
 
     * **Copy the APK to the Device:**
@@ -119,6 +145,7 @@ Once the container is running, you can connect to it and start developing.
         adb -s [device_ser_num] push [local_file_path_in_container] [device_path]
         # Example: adb -s emulator-5554 push build/app/outputs/flutter-apk/app-release.apk /sdcard/
         ```
+
         (Replace `[device_ser_num]` with your emulator/device serial found via `adb devices`).
 
     * **Install the APK on the Device:**
@@ -126,6 +153,7 @@ Once the container is running, you can connect to it and start developing.
         adb -s [device_ser_num] install -r [local_apk_path_in_container]
         # Example: adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-release.apk
         ```
+
         (The `-r` flag reinstalls, keeping data).
 
 ## Configuration
@@ -144,6 +172,7 @@ Key configuration points are in `docker-compose.yml` and `Dockerfile`:
     * `ports`: For mapping network ports if needed.
 
 Adjust these files to tailor the environment to your specific needs.
+You can apply new changes with `docker compose up -d --no-build --force-recreate` without building again.
 
 ## Troubleshooting
 
